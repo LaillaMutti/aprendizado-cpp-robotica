@@ -6,7 +6,7 @@ Aqui estão exercícios, experimentos e pequenos projetos desenvolvidos durante 
 
 - Conteúdos-------------------------------------------------------------------------------------
 
-* [ ] Variáveis
+* [X] Variáveis
 * [ ] Condicionais
 * [ ] Laços de repetição
 * [ ] Funções
