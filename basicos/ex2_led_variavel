@@ -2,13 +2,13 @@ int intervalo = 2000;
 int led = 3;
 
 void setup (){
-    pinMode(3, OUTPUT);
+    pinMode(led, OUTPUT);
 }
 void loop (){
     for (int i=0; i<10; i++){
-      digitalWrite(3, HIGH);
+      digitalWrite(led, HIGH);
       delay(intervalo);
-      digitalWrite(3, LOW);
+      digitalWrite(led, LOW);
       delay(intervalo);
       intervalo = intervalo - 100;  
     }
