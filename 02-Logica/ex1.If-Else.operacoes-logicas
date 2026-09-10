@@ -1,1 +1,22 @@
+int distancia = 15;
+int bateria = 40;
 
+void setup() {
+    Serial.begin(9600);
+}
+
+void loop() {
+    if (distancia <= 5 && bateria > 20) {
+        Serial.println("Pode ir, está perto e tem bateria suficiente");
+    }
+    else if (distancia > 5 || bateria < 20) {
+        Serial.println("Atenção: Está longe ou a bateria está baixa");
+    } else {
+        Serial.println("Erro");
+    }
+}
+
+
+// && - operador lógico E
+// || operador lógico OU
+// ! operador lógico NÃO
