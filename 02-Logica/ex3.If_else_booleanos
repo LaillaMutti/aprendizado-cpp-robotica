@@ -1,1 +1,18 @@
+bool motorLigado = true;
+bateria = 30;
 
+void setup() {
+    Serial.begin(9600);
+}
+
+void loop() {
+    if (motorLigado && bateria > 20) {
+        Serial.println("Motor ligado e bateria suficiente");
+    }
+    else if (motorLigado && bateria <= 20) {
+        Serial.println("Atenção: A bateria está baixa, motor desligará a qualquer momento. ");
+    } 
+    else if (!motorLigado){
+        Serial.println("Motor desligado");
+    }
+}
