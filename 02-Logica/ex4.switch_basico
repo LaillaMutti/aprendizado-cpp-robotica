@@ -17,16 +17,19 @@ switch (comando) {
         digitalWrite(ledverde, HIGH);
         delay(tempo);
         digitalWrite(ledverde, LOW);
+        delay(tempo);
         break;
     case 2:
         digitalWrite(ledvermelho, HIGH);
         delay(tempo);
         digitalWrite(ledvermelho, LOW);
+        delay(tempo);
         break;
     case 3:
         digitalWrite(ledamarelo, HIGH);
         delay(tempo);
         digitalWrite(ledamarelo, LOW);
+        delay(tempo);
         break;
     default:
         break;
