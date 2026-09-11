@@ -1,0 +1,59 @@
+int verde = 2;
+int amarelo = 3;
+int vermelho = 4;
+int sensor = 0; // 0 - livre, 1 - Obstáculo a frente, 2 - Obstáculo à direita.
+bool emergencia = true;
+int temponormal = 1000;
+int tempoemergencia = 200;
+
+void setup(){
+  pinMode(verde, OUTPUT);
+  pinMode(amarelo, OUTPUT);
+  pinMode(vermelho, OUTPUT);
+}
+void loop(){
+
+  switch(sensor){
+    case 0:
+      if(!emergencia){
+        digitalWrite(verde, HIGH);
+        delay(temponormal);
+        digitalWrite(verde, LOW);
+        delay(temponormal);
+      }else{
+        digitalWrite(verde, HIGH);
+        delay(tempoemergencia);
+        digitalWrite(verde, LOW);
+        delay(tempoemergencia);
+        }
+     break;
+    case 1:
+      if(!emergencia){
+        digitalWrite(vermelho, HIGH);
+        delay(temponormal);
+        digitalWrite(vermelho, LOW);
+        delay(temponormal);
+      }else{
+        digitalWrite(vermelho, HIGH);
+        delay(tempoemergencia);
+        digitalWrite(vermelho, LOW);
+        delay(tempoemergencia);
+        }
+      break;
+   case 2:
+      if(!emergencia){
+        digitalWrite(amarelo, HIGH);
+        delay(temponormal);
+        digitalWrite(amarelo, LOW);
+        delay(temponormal);
+      }else{
+        digitalWrite(amarelo, HIGH);
+        delay(tempoemergencia);
+        digitalWrite(amarelo, LOW);
+        delay(tempoemergencia);
+        }
+     break;
+  default:
+      break;
+  }
+}
