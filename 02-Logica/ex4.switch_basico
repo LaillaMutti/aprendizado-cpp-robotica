@@ -1,0 +1,34 @@
+int comando = 1;
+int ledverde = 2;
+int ledvermelho = 3;
+int ledamarelo = 4;
+int tempo = 1000;
+
+void setup(){
+   pinMode(ledverde, OUTPUT);
+   pinMode(ledvermelho, OUTPUT);
+   pinMode(ledamarelo, OUTPUT);
+   }
+   
+void loop(){
+
+switch (comando) {
+    case 1:
+        digitalWrite(ledverde, HIGH);
+        delay(tempo);
+        digitalWrite(ledverde, LOW);
+        break;
+    case 2:
+        digitalWrite(ledvermelho, HIGH);
+        delay(tempo);
+        digitalWrite(ledvermelho, LOW);
+        break;
+    case 3:
+        digitalWrite(ledamarelo, HIGH);
+        delay(tempo);
+        digitalWrite(ledamarelo, LOW);
+        break;
+    default:
+        break;
+        }
+}
