@@ -7,8 +7,8 @@ Aqui estão exercícios, experimentos e pequenos projetos desenvolvidos durante 
 - Conteúdos-------------------------------------------------------------------------------------
 
 * [X] Variáveis
-* [ ] Condicionais
-* [ ] Laços de repetição
+* [X] Condicionais
+* [X] Laços de repetição
 * [ ] Funções
 * [ ] Arrays
 * [ ] Ponteiros
