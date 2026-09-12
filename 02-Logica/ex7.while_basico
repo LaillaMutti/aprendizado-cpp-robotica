@@ -1,0 +1,16 @@
+int bateria = 100;
+int led = 2;  
+
+void setup(){
+  pinMode(led, OUTPUT);
+}
+
+void loop(){
+  while (bateria > 20) {
+     digitalWrite(led, HIGH);
+     delay(500);
+     digitalWrite(led, LOW);
+     delay(500);
+ 
+ }
+}
