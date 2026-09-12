@@ -1,0 +1,33 @@
+int opcao = 1;
+int led = 2;
+int tempo = 500;
+
+void setup(){
+   pinMode(led, OUTPUT);
+   Serial.begin(9600);
+}
+
+void loop(){
+
+   switch(opcao){
+
+    case 1: 
+      for (i = 1; i <= 3; i++) {
+         digitalWrite(led, HIGH);
+         delay(tempo);
+         digitalWrite(led, LOW);
+         delay(tempo);
+        }
+        break;
+    case 2:
+       digitalWrite(led, HIGH);
+       break;
+    case 3:
+       digitalWrite(led, LOW);
+       break;
+    default:
+       Serial.print("Opção Inválida");
+       break;
+ }
+}
+       
