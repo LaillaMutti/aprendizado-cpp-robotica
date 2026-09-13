@@ -1,0 +1,55 @@
+void setup(){
+ Serial.begin(9600);
+}
+int soma(int a, int b){
+  return a + b;
+}
+int subtracao(int a, int b){
+  return a - b;
+}
+int divisao(int a, int b){
+  return a / b;
+}
+int multiplicacao(int a, int b){
+  return a * b;
+}
+void loop(){
+  
+  Serial.println("Digite o primeiro numero:");
+  while (Serial.available() == 0) {}   
+  int a = Serial.parseInt();
+
+  Serial.println("Digite o segundo numero:");
+  while (Serial.available() == 0) {}   
+  int b = Serial.parseInt();
+
+  Serial.println("Informe a operação: 1- Soma, 2- Subtração, 3- Divisão, 4- Multiplicação ");
+  while (Serial.available() == 0) {}   
+  int op = Serial.parseInt();
+
+ int resultado;
+ switch(op){
+    case 1:
+       int resultado = soma(a, b);
+       Serial.println("O resultado é: ");
+       Serial.print(resultado);
+       break;
+    case 2: 
+       int resultado = subtracao(a, b);
+       Serial.println("O resultado é: ")
+       Serial.print(resultado);
+       break;
+    case 3:
+       int resultado = divisao(a, b);
+       Serial.println("O resultado é: ")
+       Serial.print(resultado);
+       break;
+    case 4:
+       int resultado = multiplicacao(a, b);
+       Serial.println("O resultado é: ")
+       Serial.print(resultado);
+       break;
+   default:
+       Serial.println("Erro.");
+       break;
+}
