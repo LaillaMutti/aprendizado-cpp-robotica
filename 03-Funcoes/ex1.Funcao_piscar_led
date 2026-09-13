@@ -1,1 +1,21 @@
+int ledVerde = 2;
+int ledVermelho = 3;
+int ledAmarelo = 4;
 
+void setup(){
+  pinMode(ledVerde, OUTPUT);
+  pinMode(ledVermelho, OUTPUT);
+  pinMode(ledAmarelo, OUTPUT);
+}
+
+void piscarLed(int pino, int tempo){ //é necessário declarar o tipo do parâmetro
+  digitalWrite(pino, HIGH);
+  delay(tempo);
+  digitalWrite(pino, LOW);
+  delay(tempo);
+}
+void loop(){
+  piscarLed(ledVermelho, 200);
+  piscarLed(ledVerde, 350);
+  piscarLed(ledAmarelo, 400);
+}
