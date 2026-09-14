@@ -22,25 +22,18 @@ void voltarInicio(int &x, int &y){
   x = 0;
   y = 0;
 }
-  
+
+int i;
+
 void loop(){
-  andarEsquerda(x);
-  delay(tempo);
-  andarEsquerda(x);
-  delay(tempo);
-  andarEsquerda(x);
-  delay(tempo);
-  andarEsquerda(x);
-  delay(tempo);
-  andarCima(y);
-  delay(tempo);
-  andarCima(y);
-  delay(tempo);
-  andarCima(y);
-  delay(tempo);
-  andarCima(y);
-  delay(tempo);
-  andarCima(y);
-  delay(tempo);
+
+  for(i=1; i<5; i++){
+    andarEsquerda(x);
+    delay(tempo);
+ }
+ for(i=1; i<6; i++){
+   andarCima(y);
+   delay(tempo);
+ }
 }
   
