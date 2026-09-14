@@ -30,23 +30,23 @@ void loop(){
  int resultado;
  switch(op){
     case 1:
-       int resultado = soma(a, b);
+       resultado = soma(a, b);
        Serial.println("O resultado é: ");
        Serial.print(resultado);
        break;
     case 2: 
-       int resultado = subtracao(a, b);
-       Serial.println("O resultado é: ")
+       resultado = subtracao(a, b);
+       Serial.println("O resultado é: ");
        Serial.print(resultado);
        break;
     case 3:
-       int resultado = divisao(a, b);
-       Serial.println("O resultado é: ")
+       resultado = divisao(a, b);
+       Serial.println("O resultado é: ");
        Serial.print(resultado);
        break;
     case 4:
-       int resultado = multiplicacao(a, b);
-       Serial.println("O resultado é: ")
+       resultado = multiplicacao(a, b);
+       Serial.println("O resultado é: ");
        Serial.print(resultado);
        break;
    default:
