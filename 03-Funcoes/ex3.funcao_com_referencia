@@ -7,16 +7,16 @@ int tempo = 1000;
 void setup(){
 }
 void andarDireita(int &x){
-  x = x + 1;
+  x++;
 }
 void andarEsquerda(int &x){
- x = x - 1;
+  x--;
 }
 void andarCima(int &y){
-  y = y + 1;
+  y++;
 }
 void andarBaixo(int &y){
- y = y - 1;
+  y--;
 }
 void voltarInicio(int &x, int &y){
   x = 0;
