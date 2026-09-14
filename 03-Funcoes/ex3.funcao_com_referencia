@@ -1,0 +1,46 @@
+//Exercício Plano Cartesiano
+
+int x = 1;
+int y = 5;
+int tempo = 1000;
+
+void setup(){
+}
+void andarDireita(int &x){
+  x = x + 1;
+}
+void andarEsquerda(int &x){
+ x = x - 1;
+}
+void andarCima(int &y){
+  y = y + 1;
+}
+void andarBaixo(int &y){
+ y = y - 1;
+}
+void voltarInicio(int &x, int &y){
+  x = 0;
+  y = 0;
+}
+  
+void loop(){
+  andarEsquerda(x);
+  delay(tempo);
+  andarEsquerda(x);
+  delay(tempo);
+  andarEsquerda(x);
+  delay(tempo);
+  andarEsquerda(x);
+  delay(tempo);
+  andarCima(y);
+  delay(tempo);
+  andarCima(y);
+  delay(tempo);
+  andarCima(y);
+  delay(tempo);
+  andarCima(y);
+  delay(tempo);
+  andarCima(y);
+  delay(tempo);
+}
+  
