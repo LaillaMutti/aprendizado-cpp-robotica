@@ -9,7 +9,7 @@ Aqui estão exercícios, experimentos e pequenos projetos desenvolvidos durante 
 * [X] Variáveis
 * [X] Condicionais
 * [X] Laços de repetição
-* [ ] Funções
+* [X] Funções
 * [ ] Arrays
 * [ ] Ponteiros
 * [ ] Structs
