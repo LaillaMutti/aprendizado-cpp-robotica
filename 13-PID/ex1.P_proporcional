@@ -1,0 +1,46 @@
+#include <Arduino.h>
+//pinos digitais
+int sensorEE = 3; int sensorE = 4; int sensorM = 5; int sensorD = 6; int sensorED = 7; int valorDesejado = 0; int velocidadeBase = 200; int PinMotorE = 8; int PinMotorD = 9;
+float posicao; float erro;
+int kp;
+float pos;
+int P;
+int valorEE; int valorE; int valorM; int valorD; int valorED;
+
+float calculoPosicao(float valorEE, float valorE, float valorM, float valorD, float valorED) {
+    // soma dos sensores
+    float pos = valorEE + valorE + valorM + valorD + valorED;
+
+    if (pos == 0) return 0; // evita divisão por zero
+
+    // média ponderada
+     return ((valorEE * -2) + 
+              (valorE * -1) + 
+              (valorM * 0) + 
+              (valorD * 1) + 
+              (valorED * 2)) / pos;
+}
+float calculoErro(float posicao){
+  return valorDesejado - posicao;
+}
+float proporcional(float erro){
+  return kp * erro;
+}
+void setup(){
+  pinMode(sensorEE, INPUT);
+  pinMode(sensorE, INPUT);
+  pinMode(sensorM, INPUT);
+  pinMode(sensorD, INPUT);
+  pinMode(sensorED, INPUT);
+}
+
+void loop() {
+  valorEE = digitalRead(sensorEE);
+  valorE = digitalRead(sensorE);
+  valorM = digitalRead(sensorM);
+  valorD = digitalRead(sensorD);
+  valorED = digitalRead(sensorED);
+  posicao = calculoPosicao(valorEE, valorE, valorM, valorD, valorED);
+  erro = calculoErro(posicao);
+  P = proporcional(erro);
+}
