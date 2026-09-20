@@ -1,24 +1,31 @@
 #include <Arduino.h>
 //pinos digitais
-int sensorEE = 3; int sensorE = 4; int sensorM = 5; int sensorD = 6; int sensorED = 7; int valorDesejado = 0; int velocidadeBase = 200; int PinMotorE = 8; int PinMotorD = 9;
-float posicao; float erro;
-int kp;
-float pos;
-int P;
-int valorEE; int valorE; int valorM; int valorD; int valorED;
+int sensorE = 2; int sensorM = 13; int sensorD = 12; 
 
-float calculoPosicao(float valorEE, float valorE, float valorM, float valorD, float valorED) {
+int valorDesejado = 0; int velocidadeBase = 255; 
+
+int FrenteMotorE = 5; int TrasMotorE = 6; int FrenteMotorD = 9; int TrasMotorD = 4;
+
+int enableE = 11; int enableD = 3;
+
+float posicao; float erro;
+
+int kp = 20; float pos; int P;
+
+int valorE; int valorM; int valorD; 
+
+float calculoPosicao(float valorE, float valorM, float valorD) {
     // soma dos sensores
-    float pos = valorEE + valorE + valorM + valorD + valorED;
+    float pos = valorE + valorM + valorD;
 
     if (pos == 0) return 0; // evita divisão por zero
 
     // média ponderada
-     return ((valorEE * -2) + 
-              (valorE * -1) + 
+     return //((valorEE * -2) + 
+              ((valorE * -1) + 
               (valorM * 0) + 
-              (valorD * 1) + 
-              (valorED * 2)) / pos;
+              (valorD * 1)) / pos; 
+              //(valorED * 2)) / pos;
 }
 float calculoErro(float posicao){
   return valorDesejado - posicao;
@@ -26,21 +33,60 @@ float calculoErro(float posicao){
 float proporcional(float erro){
   return kp * erro;
 }
+void frente(){
+    analogWrite(enableE, velocidadeBase);
+    analogWrite(enableD, velocidadeBase);
+    digitalWrite(FrenteMotorD, HIGH);
+    digitalWrite(TrasMotorD, LOW);
+    digitalWrite(FrenteMotorE, HIGH);
+    digitalWrite(TrasMotorE, LOW);
+}
+void esquerda(){
+    analogWrite(enableE, velocidadeBase);
+    analogWrite(enableD, velocidadeBase);
+    analogWrite(enableE, velocidadeBase);
+    analogWrite(enableD, velocidadeBase);
+    digitalWrite(FrenteMotorD, LOW);
+    digitalWrite(TrasMotorD, HIGH);
+    digitalWrite(FrenteMotorE, HIGH);
+    digitalWrite(TrasMotorE, LOW); 
+}
+void direita(){
+    analogWrite(enableE, velocidadeBase);
+    analogWrite(enableD, velocidadeBase); 
+    analogWrite(enableE, velocidadeBase);
+    analogWrite(enableD, velocidadeBase);
+    digitalWrite(FrenteMotorD, HIGH);
+    digitalWrite(FrenteMotorE, LOW);
+    digitalWrite(TrasMotorD, LOW);
+    digitalWrite(TrasMotorE, HIGH);
+}
 void setup(){
-  pinMode(sensorEE, INPUT);
-  pinMode(sensorE, INPUT);
-  pinMode(sensorM, INPUT);
-  pinMode(sensorD, INPUT);
-  pinMode(sensorED, INPUT);
+  pinMode(sensorE, INPUT); pinMode(sensorM, INPUT); pinMode(sensorD, INPUT);
+
+  pinMode(enableE, OUTPUT); pinMode(enableD, OUTPUT);
+
+  pinMode(FrenteMotorD, OUTPUT); pinMode(TrasMotorD, OUTPUT); pinMode(FrenteMotorE, OUTPUT); pinMode(TrasMotorE, OUTPUT);
+  Serial.begin(9600);
 }
 
 void loop() {
-  valorEE = digitalRead(sensorEE);
+  //valorEE = digitalRead(sensorEE);
+  Serial.println(digitalRead(sensorD));
+  
   valorE = digitalRead(sensorE);
   valorM = digitalRead(sensorM);
   valorD = digitalRead(sensorD);
-  valorED = digitalRead(sensorED);
-  posicao = calculoPosicao(valorEE, valorE, valorM, valorD, valorED);
+  //valorED = digitalRead(sensorED);
+  posicao = calculoPosicao(valorE, valorM, valorD);
   erro = calculoErro(posicao);
   P = proporcional(erro);
+
+  if (P > 0){
+    direita();
+  }else if(P == 0){
+    frente();
+  } else if(P<0){
+    esquerda();
+  }
 }
