@@ -1,0 +1,82 @@
+#include <Arduino.h>
+//pinos digitais
+int sensorE = 3; int sensorM = 4; int sensorD = 5; 
+
+int valorDesejado = 0; int velocidadeBase = 170; 
+
+int TrasDireita = 8; int FrenteDireita = 7; int TrasEsquerda = 10; int FrenteEsquerda = 9;
+
+int enableE = 6; int enableD = 11;
+
+float posicao; float erro;
+
+int kp = 150; float pos; int P;
+
+int valorE; int valorM; int valorD; 
+
+float calculoPosicao(float valorE, float valorM, float valorD) {
+ 
+    float pos = valorE + valorM + valorD;
+
+    if (pos == 0) return 0; // evita divisão por zero
+
+    // média ponderada
+     return
+              ((valorE * -1) + 
+              (valorM * 0) + 
+              (valorD * 1)) / pos; 
+
+}
+float calculoErro(float posicao){
+  return valorDesejado - posicao;
+}
+float proporcional(float erro){
+  return kp * erro;
+}
+void frente(){
+    digitalWrite(FrenteDireita, HIGH);
+    digitalWrite(FrenteEsquerda, HIGH);
+    digitalWrite(TrasDireita, LOW);
+    digitalWrite(TrasEsquerda, LOW);
+}
+void esquerda(){
+    digitalWrite(FrenteEsquerda, LOW);
+    digitalWrite(TrasEsquerda, HIGH);
+    digitalWrite(FrenteDireita, HIGH);
+    digitalWrite(TrasDireita, LOW);
+}
+void direita(){
+    digitalWrite(FrenteEsquerda, HIGH);
+    digitalWrite(TrasEsquerda, LOW);
+    digitalWrite(FrenteDireita, LOW);
+    digitalWrite(TrasDireita, HIGH);
+}
+void setup(){
+  pinMode(sensorE, INPUT); pinMode(sensorM, INPUT); pinMode(sensorD, INPUT);
+
+  pinMode(enableE, OUTPUT); pinMode(enableD, OUTPUT);
+
+  pinMode(TrasEsquerda, OUTPUT); pinMode(FrenteEsquerda, OUTPUT); pinMode(FrenteDireita, OUTPUT); pinMode(TrasDireita, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  Serial.println(digitalRead(sensorD));
+  
+  valorE = digitalRead(sensorE);
+  valorM = digitalRead(sensorM);
+  valorD = digitalRead(sensorD);
+
+  posicao = calculoPosicao(valorE, valorM, valorD);
+  erro = calculoErro(posicao);
+  P = proporcional(erro);
+
+
+  if (P > 0){
+    esquerda();
+  }else if(P == 0){
+    frente();
+  } else if(P<0){
+    direita();
+  }
+}
