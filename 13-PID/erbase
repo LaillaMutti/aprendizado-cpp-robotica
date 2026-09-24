@@ -1,0 +1,186 @@
+#include <Arduino.h>
+
+// sensores analogicos
+int sensorEE = A1;
+int sensorE = A2; 
+int sensorM = A3; 
+int sensorD = A4; 
+int sensorED = A5; 
+
+// motores (pinos IN do L298N)
+int TrasDireita = 8; int FrenteDireita = 9;
+int TrasEsquerda = 12; int FrenteEsquerda = 13;
+
+// enables (PWM)
+int enableE = 11; int enableD = 6;
+
+int valorDesejado = 0;
+int velocidadeBase = 200;
+int velocidadeGiro = 120;   // velocidade ao girar no lugar (linha perdida)
+
+float kp = 40;
+float kd = 20;              // começa baixo e vai subindo aos poucos
+float posicao, erro, P;
+float erroAnterior = 0;
+unsigned long tempoAnterior = 0;
+
+int valorEE; int valorE; int valorM; int valorD; int valorED; 
+int ultimoLado = 1;         // -1 = linha estava à esquerda, 1 = à direita
+
+// ---- NOVO: leitura analógica ----
+// leituras cruas de 0 a 1023 vindas do analogRead
+int leituraEE; int leituraE; int leituraM; int leituraD; int leituraED;
+
+// limiar que separa "vendo a linha" de "não vendo a linha"
+// PRECISA CALIBRAR: ligue o DEBUG, olhe os valores no Serial Monitor
+// com o sensor em cima da linha e fora dela, e ajuste este número
+// (e o sinal de comparação lá na leituraParaDigital, se for o caso)
+int limiar = 500;
+// ---------------------------------
+
+#define DEBUG 1             // ponha 0 na competição
+
+// ---- NOVO: converte a leitura analógica (0-1023) para 0/1,
+// exatamente como o digitalRead entregava antes, para não mudar
+// nada da lógica de posição/erro/PID que vem depois ----
+int leituraParaDigital(int leitura) {
+  return (leitura > limiar) ? 1 : 0;
+}
+
+float calculoPosicao(float valorEE, float valorE, float valorM, float valorD,
+  float valorED) {
+  float pos = valorEE + valorE + valorM + valorD + valorED;
+
+  if (pos == 0) return 0; // evita divisão por zero (nenhum sensor vê a linha)
+
+  return
+              ((valorEE * -2) +
+              (valorE * -1) + 
+              (valorM * 0) + 
+              (valorD * 1) +
+              (valorED * 2)) / pos; 
+}
+
+float calculoErro(float posicao) {
+  return valorDesejado - posicao;
+}
+
+float proporcional(float erro) {
+  return kp * erro;
+}
+
+float derivativo(float erro, float dt) {
+  if (dt == 0) return 0;              // evita divisão por zero
+  return kd * ((erro - erroAnterior) / dt);
+}
+
+// precisa vir ANTES de frente()
+void aplicaVelocidade(float correcao) {
+  int velocidadeE = constrain(velocidadeBase - correcao, 0, 255);
+  int velocidadeD = constrain(velocidadeBase + correcao, 0, 255);
+
+  analogWrite(enableE, velocidadeE);
+  analogWrite(enableD, velocidadeD);
+}
+
+// as duas rodas para frente; o P define a velocidade de cada uma
+void frente() {
+  aplicaVelocidade(P);
+  digitalWrite(FrenteDireita, HIGH);
+  digitalWrite(FrenteEsquerda, HIGH);
+  digitalWrite(TrasDireita, LOW);
+  digitalWrite(TrasEsquerda, LOW);
+}
+
+// gira no lugar para a esquerda (só quando perdeu a linha)
+void esquerda() {
+  analogWrite(enableE, velocidadeGiro);
+  analogWrite(enableD, velocidadeGiro);
+  digitalWrite(FrenteEsquerda, LOW);
+  digitalWrite(TrasEsquerda, HIGH);
+  digitalWrite(FrenteDireita, HIGH);
+  digitalWrite(TrasDireita, LOW);
+}
+
+// gira no lugar para a direita (só quando perdeu a linha)
+void direita() {
+  analogWrite(enableE, velocidadeGiro);
+  analogWrite(enableD, velocidadeGiro);
+  digitalWrite(FrenteEsquerda, HIGH);
+  digitalWrite(TrasEsquerda, LOW);
+  digitalWrite(FrenteDireita, LOW);
+  digitalWrite(TrasDireita, HIGH);
+}
+
+void setup() {
+  // ---- NOVO: pinMode não é obrigatório para pinos analógicos (A1-A5
+  // já são entrada por padrão), mas deixei aqui, sem problema nenhum
+  // em manter ----
+  pinMode(sensorE, INPUT); pinMode(sensorM, INPUT); pinMode(sensorD, INPUT); pinMode(sensorEE, INPUT); pinMode(sensorED, INPUT);
+
+  pinMode(enableE, OUTPUT); pinMode(enableD, OUTPUT);
+
+  pinMode(TrasEsquerda, OUTPUT); pinMode(FrenteEsquerda, OUTPUT);
+  pinMode(FrenteDireita, OUTPUT); pinMode(TrasDireita, OUTPUT);
+
+  Serial.begin(9600);
+}
+
+void loop() {
+  // ---- ALTERADO: digitalRead -> analogRead, seguido da conversão
+  // para 0/1 que o resto do código já esperava ----
+  leituraEE = analogRead(sensorEE);
+  leituraE  = analogRead(sensorE);
+  leituraM  = analogRead(sensorM);
+  leituraD  = analogRead(sensorD);
+  leituraED = analogRead(sensorED);
+
+  valorEE = leituraParaDigital(leituraEE);
+  valorE  = leituraParaDigital(leituraE);
+  valorM  = leituraParaDigital(leituraM);
+  valorD  = leituraParaDigital(leituraD);
+  valorED = leituraParaDigital(leituraED);
+
+  unsigned long agora = millis();
+  float dt = (agora - tempoAnterior) / 1000.0;  // em segundos
+
+  posicao = calculoPosicao(valorEE, valorE, valorM, valorD, valorED);
+  erro = calculoErro(posicao);
+  P = proporcional(erro) + derivativo(erro, dt);
+
+  erroAnterior = erro;
+  tempoAnterior = agora;
+
+  if (posicao == -2){
+    direita();
+
+  }
+
+  if (posicao == 0) {
+    // perdeu a linha: gira para o último lado em que ela foi vista
+    if (ultimoLado < 0) esquerda();
+    else direita();
+  } else {
+    // linha visível: memoriza o lado e segue para frente com correção pelo P
+    if (posicao < 0) ultimoLado = -1;
+    else if (posicao > 0) ultimoLado = 1;
+    //frente();
+  }
+
+#if DEBUG
+  // ---- ALTERADO: agora também mostra a leitura analógica crua,
+  // é o que você vai usar pra calibrar o "limiar" lá em cima ----
+  Serial.print("cru: ");
+  Serial.print(leituraEE); Serial.print(" ");
+  Serial.print(leituraE); Serial.print(" ");
+  Serial.print(leituraM); Serial.print(" ");
+  Serial.print(leituraD); Serial.print(" ");
+  Serial.print(leituraED); Serial.print(" | digital: ");
+  Serial.print(valorEE); Serial.print(" ");
+  Serial.print(valorE); Serial.print(" ");
+  Serial.print(valorM); Serial.print(" ");
+  Serial.print(valorD); Serial.print(" ");
+  Serial.print(valorED); Serial.print(" | P = ");
+  Serial.println(P);
+#endif
+}
