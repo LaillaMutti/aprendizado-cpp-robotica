@@ -1,0 +1,147 @@
+#include <Arduino.h>
+
+// sensores analogicos
+int sensorEE = A1;
+int sensorE = A2; 
+int sensorM = A3; 
+int sensorD = A4; 
+int sensorED = A5; 
+
+// motores (pinos IN do L298N)
+int TrasDireita = 8; int FrenteDireita = 9;
+int TrasEsquerda = 12; int FrenteEsquerda = 13;
+
+// enables (PWM)
+int enableE = 11; int enableD = 6;
+
+int valorDesejado = 0;
+int velocidadeBase = 200;
+int velocidadeGiro = 120;   // velocidade ao girar no lugar (linha perdida)
+
+float kp = 40;
+float kd = 20;              // começa baixo e vai subindo aos poucos
+float posicao, erro, P;
+float erroAnterior = 0;
+unsigned long tempoAnterior = 0;
+
+int valorEE; int valorE; int valorM; int valorD; int valorED; 
+int ultimoLado = 1;         // -1 = linha estava à esquerda, 1 = à direita
+
+#define DEBUG 1             // ponha 0 na competição
+
+float calculoPosicao(float valorEE, float valorE, float valorM, float valorD,
+  float valorED) {
+  float pos = valorEE + valorE + valorM + valorD + valorED;
+
+  if (pos == 0) return 0; // evita divisão por zero (nenhum sensor vê a linha)
+
+  return
+              ((valorEE * -2) +
+              (valorE * -1) + 
+              (valorM * 0) + 
+              (valorD * 1) +
+              (valorED * 2)) / pos; 
+}
+
+float calculoErro(float posicao) {
+  return valorDesejado - posicao;
+}
+
+float proporcional(float erro) {
+  return kp * erro;
+}
+
+float derivativo(float erro, float dt) {
+  if (dt == 0) return 0;              // evita divisão por zero
+  return kd * ((erro - erroAnterior) / dt);
+}
+
+// precisa vir ANTES de frente()
+void aplicaVelocidade(float correcao) {
+  int velocidadeE = constrain(velocidadeBase - correcao, 0, 255);
+  int velocidadeD = constrain(velocidadeBase + correcao, 0, 255);
+
+  analogWrite(enableE, velocidadeE);
+  analogWrite(enableD, velocidadeD);
+}
+
+// as duas rodas para frente; o P define a velocidade de cada uma
+void frente() {
+  aplicaVelocidade(P);
+  digitalWrite(FrenteDireita, HIGH);
+  digitalWrite(FrenteEsquerda, HIGH);
+  digitalWrite(TrasDireita, LOW);
+  digitalWrite(TrasEsquerda, LOW);
+}
+
+// gira no lugar para a esquerda (só quando perdeu a linha)
+void esquerda() {
+  analogWrite(enableE, velocidadeGiro);
+  analogWrite(enableD, velocidadeGiro);
+  digitalWrite(FrenteEsquerda, LOW);
+  digitalWrite(TrasEsquerda, HIGH);
+  digitalWrite(FrenteDireita, HIGH);
+  digitalWrite(TrasDireita, LOW);
+}
+
+// gira no lugar para a direita (só quando perdeu a linha)
+void direita() {
+  analogWrite(enableE, velocidadeGiro);
+  analogWrite(enableD, velocidadeGiro);
+  digitalWrite(FrenteEsquerda, HIGH);
+  digitalWrite(TrasEsquerda, LOW);
+  digitalWrite(FrenteDireita, LOW);
+  digitalWrite(TrasDireita, HIGH);
+}
+
+void setup() {
+  pinMode(sensorE, INPUT); pinMode(sensorM, INPUT); pinMode(sensorD, INPUT); pinMode(sensorEE, INPUT); pinMode(sensorED, INPUT);
+
+  pinMode(enableE, OUTPUT); pinMode(enableD, OUTPUT);
+
+  pinMode(TrasEsquerda, OUTPUT); pinMode(FrenteEsquerda, OUTPUT);
+  pinMode(FrenteDireita, OUTPUT); pinMode(TrasDireita, OUTPUT);
+
+  Serial.begin(9600);
+}
+
+void loop() {
+  valorEE = digitalRead(sensorEE);
+  valorE = digitalRead(sensorE);
+  valorM = digitalRead(sensorM);
+  valorD = digitalRead(sensorD);
+  valorED = digitalRead(sensorED);
+
+  unsigned long agora = millis();
+  float dt = (agora - tempoAnterior) / 1000.0;  // em segundos
+
+  posicao = calculoPosicao(valorEE, valorE, valorM, valorD, valorED);
+  erro = calculoErro(posicao);
+  P = proporcional(erro) + derivativo(erro, dt);
+
+  erroAnterior = erro;
+  tempoAnterior = agora;
+
+  if (posicao == -2){
+    direita();
+
+  }
+
+  if (posicao == 0) {
+    // perdeu a linha: gira para o último lado em que ela foi vista
+    if (ultimoLado < 0) esquerda();
+    else direita();
+  } else {
+    // linha visível: memoriza o lado e segue para frente com correção pelo P
+    if (posicao < 0) ultimoLado = -1;
+    else if (posicao > 0) ultimoLado = 1;
+    //frente();
+  }
+
+#if DEBUG
+  Serial.print(valorE); Serial.print(" ");
+  Serial.print(valorM); Serial.print(" ");
+  Serial.print(valorD); Serial.print(" | P = ");
+  Serial.println(P);
+#endif
+}
